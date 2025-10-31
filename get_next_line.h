@@ -23,4 +23,8 @@ typedef struct s_buf
 	struct s_buf	*next;
 }					t_buf;
 t_buf	*ft_bufnew(char *content);
+size_t	ft_strlcpy(char *dst, const char *src, size_t size);
+char	*ft_strchr(const char *s, int c);
+size_t	ft_strlen(const char *s);
+char	*ft_substr(char const *s, unsigned int start, size_t len);
 #endif
