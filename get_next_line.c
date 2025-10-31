@@ -44,7 +44,7 @@ char	*get_next_line(int fd)
 		size = (ft_strlen(buflst->buf) - ft_strlen(ft_strchr(buflst->buf,
 						'\n')));
 		output = ft_substr(buflst->buf, 0, size);
-		buflst->buf = ft_substr(buflst->buf, ft_strlen(output),
+		buflst->buf = ft_substr(buflst->buf, ft_strlen(output) + 1,
 				ft_strlen(buflst->buf) - ft_strlen(output));
 	}
 	return (output);
@@ -65,6 +65,7 @@ int	main(void)
 		return (1);
 	i = 0;
 	nl = get_next_line(fd);
+	nl2 = get_next_line(fd);
 	nl2 = get_next_line(fd);
 	while (nl2[i])
 	{
