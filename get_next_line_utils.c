@@ -12,6 +12,43 @@
 
 #include "get_next_line.h"
 
+int	is_nl(t_buf *buflst)
+{
+	int	i;
+
+	i = 0;
+	while (buflst)
+	{
+		if (ft_strchr(buflst->buf, '\n'))
+			i++;
+		buflst = buflst->next;
+	}
+	return (i);
+}
+
+size_t	ft_strlcat(char	*dst, const char *src, size_t size)
+{
+	size_t	i;
+	size_t	j;
+
+	i = 0;
+	j = 0;
+	if (size == 0)
+		return (ft_strlen(src));
+	while (dst[i] && i < size)
+		i++;
+	while (src[j] && ((i + j) < (size - 1)))
+	{
+		dst[i + j] = src[j];
+		j++;
+	}
+	if (i + j <= (size - 1))
+		dst[i + j] = '\0';
+	while (src[j])
+		j++;
+	return (i + j);
+}
+
 size_t	ft_strlen(const char *s)
 {
 	size_t	i;
@@ -22,30 +59,6 @@ size_t	ft_strlen(const char *s)
 	return (i);
 }
 
-size_t	ft_strlcpy(char *dst, const char *src, size_t size)
-{
-	size_t	i;
-
-	i = 0;
-	if (size == 0)
-	{
-		dst = 0;
-		while (src[i])
-			i++;
-	}
-	else
-	{
-		while (src[i] != '\0' && i < size - 1)
-		{
-			dst[i] = src[i];
-			i++;
-		}
-		dst[i] = '\0';
-		while (src[i])
-			i++;
-	}
-	return (i);
-}
 char	*ft_strchr(const char *s, int c)
 {
 	int	i;
@@ -56,27 +69,4 @@ char	*ft_strchr(const char *s, int c)
 	if (s[i] == (char)c)
 		return ((char *)s + i);
 	return (0);
-}
-
-char	*ft_substr(char const *s, unsigned int start, size_t len)
-{
-	char	*output;
-	size_t	i;
-
-	i = 0;
-	if (!s)
-		return (NULL);
-	if (ft_strlen(s) <= start)
-	{
-		output = malloc(sizeof(char));
-		output[0] = '0';
-		return (output);
-	}
-	while (*(((char *)s) + start + i) != 0 && i < len)
-		i++;
-	output = malloc(sizeof(char) * (i + 1));
-	if (!output)
-		return (0);
-	ft_strlcpy(output, s + start, i + 1);
-	return (output);
 }

@@ -12,6 +12,23 @@
 
 #include "get_next_line.h"
 
+void	ft_bufadd_back(t_buf *lst, t_buf *new)
+{
+	t_buf	*tmp;
+
+	if (!lst || !new)
+		return ;
+	if (!lst)
+	{
+		lst = new;
+		return ;
+	}
+	tmp = lst;
+	while (tmp->next)
+		tmp = tmp->next;
+	tmp->next = new;
+}
+
 t_buf	*ft_bufnew(char *content)
 {
 	t_buf	*output;
@@ -20,34 +37,75 @@ t_buf	*ft_bufnew(char *content)
 	if (!output)
 		return (NULL);
 	output->buf = malloc(sizeof(char) * (ft_strlen(content) + 1));
-	ft_strlcpy(output->buf, content, ft_strlen(content) + 1);
+	ft_strlcat(output->buf, content, ft_strlen(content) + 1);
 	output->next = NULL;
+	return (output);
+}
+
+char	*extract_line(t_buf *buflst)
+{
+	char	*output;
+	int		size;
+	int		index;
+	void	*head;
+
+	size = 0;
+	index = 0;
+	head = buflst;
+	while (index <= is_nl(buflst))
+	{
+		if (ft_strchr(buflst->buf, '\n'))
+			size += ft_strlen(ft_strchr(buflst->buf, '\n'));
+		else
+			size += ft_strlen(buflst->buf);
+		index++;
+		buflst = buflst->next;
+	}
+	output = malloc(sizeof(char) * (size + 1));
+	size = 0;
+	buflst = head;
+	while (buflst)
+	{
+		if (ft_strchr(buflst->buf, '\n'))
+		{
+			size += ft_strlen(ft_strchr(buflst->buf, '\n'));
+			ft_strlcat(output, buflst->buf, size + 1);
+		}
+		else
+		{
+			size += ft_strlen(buflst->buf) + 1;
+			ft_strlcat(output, buflst->buf, size + 1);
+		}
+		buflst = buflst->next;
+	}
 	return (output);
 }
 
 char	*get_next_line(int fd)
 {
 	static t_buf	*buflst;
-	char			buf[BUFFER_SIZE + 1];
-	int				size;
-	char			*output;
+	char			output[BUFFER_SIZE + 1];
+	int				byte_read;
 
-	if (fd == -1)
-		return (0);
-	if (!(buflst))
+	// init my list
+	byte_read = read(fd, output, 10);
+	if (byte_read <= 0)
+		return (NULL);
+	output[byte_read] = '\0';
+	if (!buflst)
+		buflst = ft_bufnew(output);
+	// search for \n
+	if (is_nl(buflst))
+		return (extract_line(buflst));
+	while (byte_read > 0)
 	{
-		read(fd, buf, BUFFER_SIZE);
-		buflst = ft_bufnew(buf);
+		byte_read = read(fd, output, 10);
+		output[byte_read] = '\0';
+		ft_bufadd_back(buflst, ft_bufnew(output));
+		if (is_nl(buflst))
+			return (extract_line(buflst));
 	}
-	if (ft_strchr(buflst->buf, '\n'))
-	{
-		size = (ft_strlen(buflst->buf) - ft_strlen(ft_strchr(buflst->buf,
-						'\n')));
-		output = ft_substr(buflst->buf, 0, size);
-		buflst->buf = ft_substr(buflst->buf, ft_strlen(output) + 1,
-				ft_strlen(buflst->buf) - ft_strlen(output));
-	}
-	return (output);
+	return ("ERROR");
 }
 #include <fcntl.h>
 #include <sys/stat.h>
@@ -58,18 +116,16 @@ int	main(void)
 	int		fd;
 	int		i;
 	char	*nl;
-	char	*nl2;
 
 	fd = open("test", O_RDONLY);
 	if (fd == -1)
 		return (1);
 	i = 0;
 	nl = get_next_line(fd);
-	nl2 = get_next_line(fd);
-	nl2 = get_next_line(fd);
-	while (nl2[i])
+	nl = get_next_line(fd);
+	while (nl[i])
 	{
-		write(1, &nl2[i], 1);
+		write(1, &nl[i], 1);
 		i++;
 	}
 	close(fd);
