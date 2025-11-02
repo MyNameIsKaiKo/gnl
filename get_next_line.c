@@ -12,6 +12,46 @@
 
 #include "get_next_line.h"
 
+t_buf	*ft_lstlast(t_buf *lst)
+{
+	if (!lst)
+		return (NULL);
+	while (lst->next)
+	{
+		lst = lst->next;
+	}
+	return (lst);
+}
+
+t_buf	*bufclear(t_buf *buflst)
+{
+	char	*tmp;
+	int		size;
+	t_buf	*output;
+
+	size = 0;
+	if (is_nl(buflst))
+	{
+		while (size == 0)
+		{
+			if (ft_strchr(buflst->buf, '\n'))
+				size = ft_strlen(ft_strchr(buflst->buf, '\n') + 1);
+			if (size == 0)
+				buflst = buflst->next;
+		}
+		tmp = malloc(sizeof(char) * (size + 1));
+		ft_strlcat(tmp, ft_strchr(buflst->buf, '\n') + 1, size + 1);
+	}
+	else
+	{
+		tmp = malloc(sizeof(char) * 1);
+		tmp = "";
+	}
+	output = ft_bufnew(tmp);
+	free(tmp);
+	return (output);
+}
+
 void	ft_bufadd_back(t_buf *lst, t_buf *new)
 {
 	t_buf	*tmp;
@@ -55,7 +95,8 @@ char	*extract_line(t_buf *buflst)
 	while (index <= is_nl(buflst))
 	{
 		if (ft_strchr(buflst->buf, '\n'))
-			size += ft_strlen(ft_strchr(buflst->buf, '\n'));
+			size += ft_strlen(buflst->buf)
+				- ft_strlen(ft_strchr(buflst->buf, '\n'));
 		else
 			size += ft_strlen(buflst->buf);
 		index++;
@@ -68,13 +109,14 @@ char	*extract_line(t_buf *buflst)
 	{
 		if (ft_strchr(buflst->buf, '\n'))
 		{
-			size += ft_strlen(ft_strchr(buflst->buf, '\n'));
-			ft_strlcat(output, buflst->buf, size + 1);
+			size += ft_strlen(buflst->buf)
+				- ft_strlen(ft_strchr(buflst->buf, '\n'));
+			ft_strlcat(output, buflst->buf, size);
 		}
 		else
 		{
 			size += ft_strlen(buflst->buf) + 1;
-			ft_strlcat(output, buflst->buf, size + 1);
+			ft_strlcat(output, buflst->buf, size);
 		}
 		buflst = buflst->next;
 	}
@@ -94,16 +136,25 @@ char	*get_next_line(int fd)
 	output[byte_read] = '\0';
 	if (!buflst)
 		buflst = ft_bufnew(output);
+	else
+	{
+		buflst = bufclear(buflst);
+		ft_bufadd_back(buflst, ft_bufnew(output));
+	}
 	// search for \n
 	if (is_nl(buflst))
+	{
 		return (extract_line(buflst));
+	}
 	while (byte_read > 0)
 	{
 		byte_read = read(fd, output, 10);
 		output[byte_read] = '\0';
 		ft_bufadd_back(buflst, ft_bufnew(output));
 		if (is_nl(buflst))
+		{
 			return (extract_line(buflst));
+		}
 	}
 	return ("ERROR");
 }
@@ -121,7 +172,6 @@ int	main(void)
 	if (fd == -1)
 		return (1);
 	i = 0;
-	nl = get_next_line(fd);
 	nl = get_next_line(fd);
 	while (nl[i])
 	{
