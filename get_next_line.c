@@ -12,17 +12,6 @@
 
 #include "get_next_line.h"
 
-t_buf	*ft_lstlast(t_buf *lst)
-{
-	if (!lst)
-		return (NULL);
-	while (lst->next)
-	{
-		lst = lst->next;
-	}
-	return (lst);
-}
-
 t_buf	*bufclear(t_buf *buflst)
 {
 	char	*tmp;
@@ -129,7 +118,6 @@ char	*get_next_line(int fd)
 	char			output[BUFFER_SIZE + 1];
 	int				byte_read;
 
-	// init my list
 	byte_read = read(fd, output, 10);
 	if (byte_read <= 0)
 		return (NULL);
@@ -141,7 +129,6 @@ char	*get_next_line(int fd)
 		buflst = bufclear(buflst);
 		ft_bufadd_back(buflst, ft_bufnew(output));
 	}
-	// search for \n
 	if (is_nl(buflst))
 	{
 		return (extract_line(buflst));
@@ -156,7 +143,8 @@ char	*get_next_line(int fd)
 			return (extract_line(buflst));
 		}
 	}
-	return ("ERROR");
+	extract_line(buflst);
+	return (buflst->buf);
 }
 #include <fcntl.h>
 #include <sys/stat.h>
@@ -172,6 +160,9 @@ int	main(void)
 	if (fd == -1)
 		return (1);
 	i = 0;
+	nl = get_next_line(fd);
+	nl = get_next_line(fd);
+	nl = get_next_line(fd);
 	nl = get_next_line(fd);
 	while (nl[i])
 	{
