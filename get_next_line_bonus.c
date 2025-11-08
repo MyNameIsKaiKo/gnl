@@ -77,27 +77,27 @@ char	*clear_line(char *left)
 
 char	*get_next_line(int fd)
 {
-	static char	*left;
+	static char	*left[1024];
 	char		*output;
 	int			byte_read;
 
 	if (fd == -1 || BUFFER_SIZE <= 0)
 		return (0);
-	if (!left)
-		left = ft_calloc(sizeof(char), 1);
-	if (!left)
+	if (!left[fd])
+		left[fd] = ft_calloc(sizeof(char), 1);
+	if (!left[fd])
 		return (0);
 	byte_read = 1;
-	left = read_to_nl(left, fd, byte_read);
-	if (!left)
+	left[fd] = read_to_nl(left[fd], fd, byte_read);
+	if (!left[fd])
 		return (0);
-	if (*left == '\0')
+	if (*left[fd] == '\0')
 	{
-		free(left);
-		left = NULL;
-		return (left);
+		free(left[fd]);
+		left[fd] = NULL;
+		return (left[fd]);
 	}
-	output = extract_line(left);
-	left = clear_line(left);
+	output = extract_line(left[fd]);
+	left[fd] = clear_line(left[fd]);
 	return (output);
 }
